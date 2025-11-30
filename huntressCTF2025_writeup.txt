@@ -1,0 +1,75 @@
+844 place of 6868 paticipants
+
+Read the Rules: Warmup
+- Go to the rules page and looked at source code first which provided nothing, then went to inspect the page and used a find on the html to find the flag hidden as a comment
+
+Technical Support: Warmup
+- Tasked to join the discord and find the flag obfuscated on the open-ticket channel which was just narely hidden at the top ribbon
+
+Spam Test: Warmup
+- Asked to look up the md5 hash for the Generic Test for Unsolicited Bulk Email (GTUBE) string which is "XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X"
+- If your spam filter supports it, the GTUBE provides a test by which you can verify that the filter is installed correctly and is detecting incoming spam, Spam filter developers should add a rule, where possible, to recognise the following 68-byte string in the message body, and trigger on it
+I run an echo command followed by the string and pipe the md5sum command to get the hash but this was initially incorrect, but just needed to add the -n flag after echo to remove the trailing newline
+
+Cover All Your Bases: Warmup
+- We are given 10 different encoded messages we need to decode mostly using Basex decode methods including Base2/binary, Base8/octal, Base10/decimal, Base16/hexadecimal, Base32, Base45, Base64, Base85 and Base92
+- This could be solved using python scripts or cyberchef and I used both for this exercise
+
+Just a Little Bit: Warmup
+- We are given a binary string with the hint "If just a little bit were to go missing... would it really even matter?"
+- Binary strings total bit length is normally divisible by 7 or 8 and this string was 266 bits meaning that we likely need to use 7 bit decoding which would go along with the hint as its conventionally 8 bit
+- I created a python script for this that held the binary string as a variable, I used list comprehension to loop through the string and break it out into 7 bit chunks to produce 38 strings that I then passed to a decode function where I converted the binary strings into integers and converted those integers into their Unicode character counterparts until the flag was produced and joined together
+
+QRception:Warmup
+- This admittedly took me way longer than it should have, but we were given a qrcode .png file and I tried scanning the code w/ my phone first and returned nothing and then proceeded to run the normal forensics tools in linux such as file, strings, binwalk, exiftool, xxd, etc and found nothing suspicious
+- I then thought to try and just read the qr code using linux cli which I thought may be possible which led me to the zbar-tools which is a collection of open-source cli utilities for decoding barcodes and qr codes from images and ran into an issue with "repo drift" which was a slightly annoying but cool learning experience. I just needed to clean out my sources.list and clean and update my package lists then I could install the package
+- After this I ran zbarimg on the qr to get a new qr code I scanned with my phone to get the flag
+
+RFC 9309: Warmup
+- This challenge had an instance available to a webpage and of course due to the title of challenge it likely had to do with robots.txt in the url directory
+- I did make it there and originally saw nothing of worth but noticed that the page was much longer than expected and after running a quick find the flag was lower down on that page.
+
+OFA: Warmup
+- We are given another website instance we are to visit which is a login page with OFA standing for One Factor Authentication
+- I tried tinkering with this for a bit using Burp Suite but saw in the discord channel that there were no Burp challenges open yet so i was over thinking this
+- I tried logging in using admin admin credentials which takes you to the /otp page but of course we are not sent a code anywhere
+- i looked throught the source code and found nothing, but using inspect on the HTML I found that there was a script embedded that provided a constant otp value which I then used to retrieve the flag
+
+Snooze: Warmup
+- Here we are presented with a file just called snooze w/ no extension so I ran file on it which returned compress'd data 16 bits and I also saw UNIX-compressed file so after a bit of OSINT it seems I just needed to give it a .z extension manually then used gzip to decompress the file and simply ran a cat on the new snooze file which provided the flag
+
+ARIKA: Web
+- This was the first web challenge I attempted in this ctf and provided an instance to a web application of a ransomware group with a terminal style website with the hint "sounds like they're worried about security concerns of their own" along with a zip file with the set up of the challenge
+- After starting the instance and doing some poking around entering the 6 commands we are provided and not returning much of anything, I tried entering commands that we were not provided like ls, echo etc none of which seemed to prompt anything but my first thought is command injection, I also reviewed cookies, source code, and tried looking for different urls to no avail. I also did not achieve anything by piping a command not listed after a valid command like whoami as well as attempting to add a new line for an additional unlisted command and still nothing.
+- After playing with it for a bit I extracted the zip file and looked through the contents and dove into the app.py that was provided and did not notice much apart from the "command" option which I will use later
+- From here instead of interacting directly with the terminal, I had an idea to interact with it via curl in my linux terminal to create my own request using this code which worked to test
+curl -s -X POST http://10.1.163.167/ \
+  -H 'Content-Type: application/json' \
+  -d '{"command":"whoami"}'
+- From here I tried a slew of different commands in the command portion of the request and tried much of what I tried above and the one that worked was using a newline (/n) in between multiple commands as long as I beging with a valid command like whoami and in the first instance I did /necho test which did print, so after using ls and finding flag.txt, I simply did the same with cat flag.txt
+
+Sigma Linter: Web
+- This challenge provided another instance however with no zip file to be able to read the functionality and had a hint about a web interface for cli tools that seems a little busted
+- I googled sigma linter originally and found out that it is a tool to validate Sigma rules compliance for detecting threats in SIEMs
+- After starting the instance, I am presented with a user input window, a validate results, and a button to validate, along with a few examples below and my first thought was to do some simple checks in the input for command injection like whoami, id, echo etc using different variations like id, ; id, $$ id, | id, $(id) etc which returned nothing except errors
+- I was lost so I ended up looking into the source code and found that the textarea input is looking for YAML (found out today Sigma rules are YAML) which I ended up googling common YAML vulnerabilities and found the most common is unsafe PyYAML which is when python services use yaml.load instead of the safe version yaml.safe_load (safe_load restricts the python objects that can be executed from a yaml file to simple things like lists and ints). This could lead to Remote code execution (RCE) so I ended up testing first after searching for some payloads online which worked! Here is the first payload that let me execute commands: 
+!!python/object/apply:subprocess.check_output
+	- ["whoami"]
+- This returned a base64 encoded result in the window which I decoded using linux and it returned *ROOT* !!!
+- From here its pretty much a hop skip and a jump to flag, I have to separate commands in a list format so I just ran ["ls"] then ["cat", "flag.txt"] and solved
+
+Tabby's Date: Forensics
+- Man its been a couple days since I solved a challenge, I was on a good streak for a second... Anyway today was the day! This is the first forensics challenge I tackled during this ctf and the hint is: 
+	Ohhhh, Tab, Tab, Tab.... what has she done.
+	My friend Tabby just got a new laptop and she's been using it to take notes. She says she puts her whole life on there!
+	She was so excited to finally have a date with a boy she liked, but she completely forgot the details of where and when. She told me she remembers writing it in a note... but she doesn't think she saved it!!
+	She shared with us an export of her laptop files.provides a dump of computer files for
+- We are presented with an encrypted zip file of the contents of Tabby's laptop and unzip using 7z in linux and begin the search
+- I look around manually for a while to see what was going on and noticed that the folders were all empty and every file extension except for .bin was empty as well. Because of this, I started focusing on the .bin files by running a multitude of commands on *.bin which revealed surpisingly little. These included strings, binwalk, exiftool, file etc and was stumpped for quite some time.
+- I ended up rereading the prompt and saw that there was a focus on a Note and I looked into how to recover unsaved notes and there was a mention that notes use little-endian and I remembered that strings has a flag to search little-endian using -el I had used previously, and when I used that on the .bin files all of her notes revealed themselves and after scrolling down (could've piped grep remember for future) I found the when of her date and the flag was just underneath in the form of the starbucks wifi password
+
+Maximum Sound: Warmup
+- The most difficult warmup challenge by far, even took me more time than regular challenges but in this we are presented with a .wav file with a hint about that the sound is loud but really hits the target
+- I ran standard file forensics scans such as strings, xxd binwalk etc to no avail and figured this was steganography and tried using Sonic Visualizer and Audacity to view the waveform and spectogram which also revealed nothing
+- I was lost on this for a long time and honestly just kept looking up different ctf writeups in the past that had to do with audio forensics and came across a post that mentioned sstv (Slow Scan Television Audio) as a way to transmit images over a radio channel. There was a decoder for this online to convert sstv audio to images which revealed a qr code with a target in the center!
+- This qr code is specifically a maxicode barcode which I guess is commonly used by UPS for package sorting, but going to a maxicode scanner online and uploading that image returned the flag.

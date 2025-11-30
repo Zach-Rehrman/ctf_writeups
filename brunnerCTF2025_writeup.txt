@@ -1,0 +1,17 @@
+Discord:
+- Located in the announcement that the CTF is live, simply obfuscated using ||[flag_name]||
+
+DoughBot:
+- We are given a .zip file called forensics_doughbot.zip which I unzipped into my working directory to reveal a doughbot_dump.bin file
+- within the file after calling a cat command to read the contents, we can see a dev.note called bootlog_flag which equals a base64 enconded string (We know this because of the = at the end of the string and the length)
+- Ran command echo YnJ1bm5lcnttMXgzZF9zMWduYWxzXzRfc3VyZX0= | base64 --decode to get the flag
+
+Where Robots Cannot Search:
+- We are given a link to a webpage instance with the description "Ahh, the Brunnerne company. But they have a secret, hidden away from robot search."
+- This instantly makes me think to check /robots.txt path in the url which shows User-agent: *, Disallow: /admin, Disallow: /private, Disallow: /hidden, Disallow: /flag.txt
+- I then check the /flag.txt path which is where the flag was hidden
+
+Half-Baked:
+- The challenge starts with a description saying that their boss wants to secure the shop with RSA. It mentions to secure the RSA with good primes and to "use 2 to save money" and we are given a zip file
+- After unzipping the file we are left w/ a .txt that contains an n, e, and c value, which represents portions of an RSA key formula. I orgiginally thought the trick to the question being that 2 small primes were used for encryption, but it ended up being 2^1337 which is just 2 raised to a small prime meaning that this should be a relatively easy RSA to break
+- I have a python script that decrypts RSA keys, including finding the factorial of n (p & q), finding the phi value phi = (p-1) * (p-2) and then the inverse(e, phi) finally getting m = pow(c, d, n) and converting to plaintext providing us the flag

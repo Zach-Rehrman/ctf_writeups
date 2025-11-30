@@ -1,0 +1,37 @@
+Breach (pre ctf challenge):
+- Begins by mentioning This engagement aims to find a way to open the gate by bypassing the badge authentication system
+- start up victim vm
+- challenge mentions to check all open ports so we begin with the nmap -sS -p- <ip> command to get a list of ports and found 1880 vsat-control to be suspicious
+- began looking at webites using the victim ip http://ip:80/ and http://ip:8080/ revealing a webpage w/ the image 	of a locked gate
+- viewing the source code of this page revealed fetch('/api/gate')
+- after going nowhere i visited http://ip:1880/ which revealed a NODE-RED page, after googling finding out this page is a low code flow-based dev tool
+- I then went to http://ip:1880/ui to find a dashboard with switched for badge and motion detector (clever for a locked gate)
+- I switched these both off and refreshed the page with the locked gate image and received my flag
+
+Discord
+- Easy challenge, had to call a '/secret-function' in the ctf channel which was listed in the channel description and provided the flag from a bot
+
+OSINT 1
+- This challenge begins by providing us a website 'virelia-water.it.com' and see the archive report from june 2025 returns a 404 
+- Explore source code
+- This shows href="/mail-archives/">Archives Home</a>
+    <a href="/policies/">Compliance Policies</a> in the html
+- After visiting these pages, I see href="/mail-archives/ot-alerts/2025-06.html and then that shows the same error message as the UI
+- Policies tells us Virelia maintains a monthly exceptions report for OT alerts, redacting routine entries to protect sensitive operational data
+- I then try searching for other subdomains that may be suspicious using https://crt.sh and use the website name and we are provided w/ 2 additional subdomains, stage0.virelia-water.it.com and 54484d7b5375357373737d.virelia-water.it.com
+- When we convert the 54484d7b5375357373737d from hex we receive the first flag
+
+OSINT 2
+- This beging by looking into the 2nd subdomain above which takes us to an ICS Operator Console which is the attacker infrastructure
+- After looking into this source code, we find a script in the html <script src="https://raw.githubusercontent.com/SanTzu/uplink-config/refs/heads/main/init.js"></script>
+- this returned fallback_dns: "uplink-fallback.virelia-water.it.com",
+  token: "JBSWY3DPEBLW64TMMQQQ=="
+- The token was base 32 encoded and returned Hello World ! and the fallback dns site was not something we could actually visit
+- We could however use dig TXT uplink-fallback.virelia-water.it.com +short in the terminal to return a base64 encoded message which ended up being the next flag
+
+Chess Industry
+- This challenge opens up with the user needing to start up the victim's machine and we are given an IP address to a static page called PrecisionChess IOT which includes Magnus the Founder, Fabiano the lead software engineer and Hikaru the Community
+- I ran an nmap to find ssh (22) finger (79) and Http (80) were open, can't connect to ssh due to not having a password but I could telnet to the ip on port 79 and tried Magnus, Fabiano, and Hikaru as usernames of which Fabiano worked which makes sense as he is the lead software engineer
+- This connection provided a base64 encoded string which returned Fabiano and what looked to be a password which I used to attempt to ssh into the IP and gained access
+- I ran an ls and saw user.txt which I then used cat on to find the first flag
+- 

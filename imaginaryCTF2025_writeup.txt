@@ -1,0 +1,3 @@
+Wave:
+- This challenge begins w/ a wave.wav file to download and a hint that this is not a steganography challenge but I tried running the sox command anyway to return a spectogram in case the flag was hidden in there but nothing
+- Next I thought to check the metadata by running strings and piping a grep for the ictf prefix and the flag was revealed

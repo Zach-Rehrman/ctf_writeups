@@ -1,0 +1,48 @@
+Read the Rules:
+- Go to rules page
+- search source code
+- find flag in clear text
+
+Technical Support:
+- Find flag in clear text in the nahamcon discord ctf-support channel
+
+Naham-Commencement 2025
+- Click link to website that returns a login page
+- login with default credentials returns 'Access denied. Client-side validation failed. Try again.'
+- This error message seems to imply JS
+- check source code to find static/js/main.js file which handles logins
+- Username is a caesar cipher for +10 using constant value "dqxqcius"
+- PW is a Vigenere cipher with 'YeaTtgUnzezBqiwa2025' as the default value and 'nahamcon' as the key
+
+Free Flags!:
+- Provided with a txt file with hundreds of possible flags
+- Wrote python file using re (regex) library to check for flag pattern
+provided in the rules
+- Looped through each line in the flag.txt file to find all flags that
+match the pattern
+- Only 1 match which found the flag
+
+The Oddyssey:
+- Provided nc to hostname and port which takes you to a server that returns chunks of a book when you input the 'enter key' (/n)
+- Rather than manually hitting enter I created a python script w/ pwntools to connect to the server, create a loop to send enter if I receive a chunk and disconnect when there are no more chunks
+- The flag was not returned at the end but using the shell search function I located the flag in the middle of the text
+
+Quartet:
+- Given 4 z0x files to download
+- This is normally provided with a zip file with which there was none
+- Can combine these into a zip file using cat quartet.z* > quartet_cat.zip
+- Unzip the new zipped file which gives a jpeg of *strings* instruments
+- Strings command on the image to reveal the flag
+
+SNAD
+- Start instance which provides a website link where when you click, rainbow particles are dropped
+- When vieweing source code, there is a JS file we can search to view functionality
+- Appears that when you click a particle is dropped at that coordinates; Looks like a flag appears when particles are dropped of a certain color at certain locations
+- You can enter the console in the dev tools and input the coordinates and color provided to place them and receive the flag
+
+The Martian: 
+- Given a .Martian file I ran both cat (which returned nonsense) and strings which returned jpg files and multiple instances of BZh91AY&SY which is indicative of Bzip2 compression
+- It was likely multiple bzip2 archives were embedded so to extract them, I copied the .martian file to martian.bin and used binwalk
+- I used the results of the binwalk with dd to dump into part1-5 .bz2 files
+- I then decompressed the .bz2 files using bzip -d which gave me part1-5 which I then used the file command on each part to view what type of information they hold
+- 2 out of 5 parts returned as jpeg files which I used eog to view and the flag was the image
